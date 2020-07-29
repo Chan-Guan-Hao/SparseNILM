@@ -12,6 +12,7 @@ from libDataLoaders import dataset_loader
 from libFolding import Folding
 from libSSHMM import SuperStateHMM
 from libAccuracy import Accuracy
+import pickle
 
 
 print()
@@ -49,8 +50,14 @@ disagg_algo = getattr(__import__('algo_' + algo_name, fromlist=['disagg_algo']),
 print('Using disaggregation algorithm disagg_algo() from %s.' % ('algo_' + algo_name + '.py'))
 
 datasets_dir = './datasets/%s.csv'
-logs_dir = './logs/%s.log'
+# logs_dir = './logs/%s.log'
+logs_dir1 = f'./logs/{dataset}_{test_id}_test_report1.csv'
+logs_dir2 = f'./logs/{dataset}_{test_id}_test_report2.csv'
 models_dir = './models/%s.json'
+results = []
+results_dir = f'./logs/{dataset}_{test_id}_results_all.pkl'
+ue_tags = []
+ue_dir = f'./logs/{dataset}_{test_id}_ue_tags.pkl'
 
 print()
 print('Loading saved model %s from JSON storage (%s)...' % (modeldb, models_dir % modeldb))
@@ -67,7 +74,7 @@ for data in jdata:
     sshmms.append(sshmm)
 del jdata
 labels = sshmms[0].labels
-print('\tModel lables are: ', labels)
+print('\tModel labels are: ', labels)
 
 print()
 print('Testing %s algorithm load disagg...' % algo_name)
@@ -85,7 +92,12 @@ adapted_errors = 0
 multi_switches_count = 0
 
 print()
+
+print(dataset_loader(datasets_dir % dataset, labels, precision, denoised))
+
+
 folds = Folding(dataset_loader(datasets_dir % dataset, labels, precision, denoised), folds)
+# print(folds)
 for (fold, priors, testing) in folds: 
     del priors
     tm_start = time()
@@ -94,6 +106,7 @@ for (fold, priors, testing) in folds:
     obs_id = list(testing)[0]
     obs = list(testing[obs_id])
     hidden = [i for i in testing[labels].to_records(index=False)]
+    print(len(obs))
     
     print()
     print('Begin evaluation testing on observations, compare against ground truth...')
@@ -124,14 +137,24 @@ for (fold, priors, testing) in folds:
         calc_total[0] += ctotal[0]
         calc_total[1] += ctotal[1]
         
+        ue_tag = False
+        
         if p == 0.0:
             unexpected_event += 1
+            ue_tag = True
+        
+        ue_tags.append(ue_tag)
             
         indv_tm_sum += elapsed
         indv_count += 1
         
         y_noise += round(y1 - sum(y_true), 1)
         y_total += y1
+        
+        # if (i < 25):
+            # print(y_true)
+        
+        results.append([folds.data.index[i], list(map(lambda x: x / precision, y_est)), list(map(lambda x: x / precision, y_true)), s_est, s_true])
         
         if not i % pbar_incro or i == 1:
             pbar += '=' #if i > 1 else ''
@@ -190,13 +213,32 @@ report.append(['Noise', round(y_noise / y_total, 4)])
 print()
 print('-------------------------------- CSV REPORTING --------------------------------')
 print()
-print(','.join([c[0] for c in report]))
-print(','.join([str(c[1]) for c in report]))
+line1 = ','.join([c[0] for c in report])
+line2 = ','.join([str(c[1]) for c in report])
+print(line1)
+print(line2)
 print()
+
+text = [line1, line2]
+with open(logs_dir1,"w", newline='') as file:
+    for line in text:
+        file.write(line)
+        file.write('\n')
+file.close()
+
 (acc_hdr, acc_det) = acc.csv(test_id, labels, measure)
-print(acc_hdr)
-print(acc_det)
+line3 = acc_hdr
+line4 = acc_det
+print(line3)
+print(line4)
 print()
+
+text = [line3, line4]
+with open(logs_dir2,"w", newline='') as file:
+    for line in text:
+        file.write(line)
+        file.write('\n')
+file.close()
 print('-------------------------------- ------------- --------------------------------')
 
 print()
@@ -204,3 +246,13 @@ print('End Time = ', datetime.now(), '(local time)')
 print()
 print('DONE!!!')
 print()
+
+with open(results_dir, 'wb') as f:  # Python 3: open(..., 'wb')
+    pickle.dump(results, f)
+    
+f.close()
+
+with open(ue_dir, 'wb') as f:  # Python 3: open(..., 'wb')
+    pickle.dump(ue_tags, f)
+    
+f.close()

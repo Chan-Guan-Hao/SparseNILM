@@ -1,0 +1,2 @@
+Model DB,Run Date,Dataset,Precision,Max States,Denoised?,Model Noise?,Folds,IDs,Train Time,Avg Time/Fold,Avg Load States,Sum Load States,Super-States,Loads,Obs,Time Len,P0 Size,P0 Non-Zero,P0 Sparsity,P0 bytes,A Size,A Non-Zero,A Sparsity,A bytes,B Size,B Non-Zero,B Sparsity,B bytes
+AMPdsR1_1min_A_model_FGE,2020-07-20 03:26:58.411805,AMPdsR1_1min_A_train,1.0,8,False,False,1,FGE,0.21,0.21,3.0,3.0,3.0,1,106,419635,3.0,3.0,0.0,304.0,9.0,9.0,0.0,249.0,318.0,183.0,0.4,459.0

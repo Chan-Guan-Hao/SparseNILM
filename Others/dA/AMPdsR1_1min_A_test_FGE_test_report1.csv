@@ -1,0 +1,2 @@
+Test ID,Run Date,Dataset,Precision,Denoised?,Model Noise?,Limit,Algorithm,Folds,Measure,Tests,Total Calc Vp1,Actual Calc Vp1,Total Calc Vp2,Actual Calc Vp2,Test Time,Avg Time/Fold,Disagg Time,Unexpected,Adapted,Adapted Errors,Mult-Switches,Noise
+FGE,2020-07-20 03:35:38.364368,AMPdsR1_1min_A_test,10.0,False,False,all,SparseViterbi,1,dA,104908,629448,526636,3776688,2578066,0.2,0.2,0.0000676484,64,0,0,0,0.9617

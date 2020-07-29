@@ -1,0 +1,2 @@
+Model DB,Run Date,Dataset,Precision,Max States,Denoised?,Model Noise?,Folds,IDs,Train Time,Avg Time/Fold,Avg Load States,Sum Load States,Super-States,Loads,Obs,Time Len,P0 Size,P0 Non-Zero,P0 Sparsity,P0 bytes,A Size,A Non-Zero,A Sparsity,A bytes,B Size,B Non-Zero,B Sparsity,B bytes
+AMPdsR1_1min_A_model_HPE,2020-07-20 03:35:20.185526,AMPdsR1_1min_A_train,10.0,8,False,False,1,HPE,0.21,0.21,5.0,5.0,5.0,1,10501,419635,5.0,5.0,0.0,336.0,25.0,18.0,0.3,281.0,52505.0,1658.0,1.0,3636.0

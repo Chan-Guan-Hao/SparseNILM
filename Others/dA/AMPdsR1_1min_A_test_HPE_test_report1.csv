@@ -1,0 +1,2 @@
+Test ID,Run Date,Dataset,Precision,Denoised?,Model Noise?,Limit,Algorithm,Folds,Measure,Tests,Total Calc Vp1,Actual Calc Vp1,Total Calc Vp2,Actual Calc Vp2,Test Time,Avg Time/Fold,Disagg Time,Unexpected,Adapted,Adapted Errors,Mult-Switches,Noise
+HPE,2020-07-20 03:36:18.580704,AMPdsR1_1min_A_test,10.0,False,False,all,SparseViterbi,1,dA,104908,524540,262688,2622700,692885,0.16,0.16,0.0000407641,64,0,0,0,0.7652

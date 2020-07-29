@@ -4,6 +4,7 @@
 #
 
 import pandas
+import numpy as np
 
 def AMPds_r2013(filename, ids, precision, denoised=False, verbose=True):
     """Loaders for the AMPds Release 2013 dataset."""
@@ -147,25 +148,50 @@ def REDD_lo(filename, ids, precision, denoised=False, verbose=True):
 
     if verbose: print('Loading REDD Low Res dataset at %s...' % filename)
     df = pandas.read_csv(filename)
+    print(1)
+    print(df)
 
     if verbose: print('\tSetting timestamp column %s as index.' % timestamp_col)
     df = df.set_index(timestamp_col)
+    print(2)
+    print(df)
 
     cols = ids[:]
     if unmetered_col in cols:
         cols.remove(unmetered_col)
         if verbose: print('\tNoise will modelled as %s.' % unmetered_col)
+    print(3)    
+    print(df)
 
     if verbose: print('\tKeeping only columns %s.' % str(cols))
     df = df[[agg_meter_col] + cols]
+    print(4)
+    print(df)
 
     if denoised:
         if verbose: print('\tDenoising aggregate meter column %s.' % agg_meter_col)
         df[agg_meter_col] = df[cols].sum(axis=1)
+    print(5)    
+    print(df)
 
     if verbose: print('\tCalculating unmetered column %s.' % unmetered_col)
+    print(6)
+    print(df)
+    
+    df = df * precision
+    print(6.5)
+    print(df)
+    
+    for col in list(df):
+        df[col] = df[col].astype(int)
+    print(7)
+    print(df)
+    
     df[unmetered_col] = df[agg_meter_col] - df[cols].sum(axis=1)
-    df.loc[df[unmetered_col] < 0] = 0
+    df[agg_meter_col] = df[agg_meter_col] - df[unmetered_col]
+    # df.loc[df[unmetered_col] < 0] = 0
+    print(8)
+    print(df)
 
     return df
 

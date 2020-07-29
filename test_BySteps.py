@@ -5,6 +5,7 @@
 #
 
 import sys, json
+import pickle
 from statistics import mean
 from time import time, sleep
 from datetime import datetime
@@ -45,8 +46,9 @@ disagg_algo = getattr(__import__('algo_' + algo_name, fromlist=['disagg_algo']),
 print('Using disaggregation algorithm disagg_algo() from %s.' % ('algo_' + algo_name + '.py'))
 
 datasets_dir = './datasets/%s.csv'
-logs_dir = './logs/%s.log'
+results_dir = f'./logs/{dataset}_{test_id}_results.pkl'
 models_dir = './models/%s.json'
+results = []
 
 print()
 print('Loading saved model %s from JSON storage (%s)...' % (modeldb, models_dir % modeldb))
@@ -79,7 +81,10 @@ for (fold, priors, testing) in folds:
     sshmm = sshmms[fold]
     obs_id = list(testing)[0]
     obs = list(testing[obs_id])
-    hidden = [i for i in testing[labels].to_records(index=False)]
+    # Added
+    obs = list(map(lambda x: int(x), obs))
+    # Modified
+    hidden = [(int(i[0]),) for i in testing[labels].to_records(index=False)]
     
     print()
     print('Begin evaluation testing on observations, compare against ground truth...')
@@ -113,8 +118,10 @@ for (fold, priors, testing) in folds:
         fscore = acc.fs_fscore()
         estacc = acc.estacc()
         scp = sum([i != j for (i, j) in list(zip(hidden[i - 1], hidden[i]))])
-        #print('Obs %5d%s | Δ %4d%s | Noise %3d%s | SCP %2d | Unseen? %-3s | FS-fscore %.4f | Est.Acc. %.4f | Time %7.3fms' % (y1, measure, y1 - y0, measure, y_noise, measure, scp, unseen, fscore, estacc, elapsed * 1000))
-        print('Obs %5d%s Δ %4d%s | SCP %2d | FS-fscore %.4f | Est.Acc. %.4f | Time %7.3fms' % (y1, measure, y1 - y0, measure, scp, fscore, estacc, elapsed * 1000))
+        # print('Obs %5d%s | Δ %4d%s | Noise %3d%s | SCP %2d | Unseen? %-3s | FS-fscore %.4f | Est.Acc. %.4f | Time %7.3fms' % (y1, measure, y1 - y0, measure, y_noise, measure, scp, unseen, fscore, estacc, elapsed * 1000))
+        # print('Obs %5d%s Δ %4d%s | SCP %2d | FS-fscore %.4f | Est.Acc. %.4f | Time %7.3fms' % (y1, measure, y1 - y0, measure, scp, fscore, estacc, elapsed * 1000))
+        print(f'Estimated Value: {y_est[0]} {measure} | Actual Value: {y_true[0]} {measure} | Estimated State: {s_est[0]} | Actual State: {s_true[0]}')
+        results.append([y_est[0], y_true[0], s_est[0], s_true[0]])
         sleep(1)
         
     test_times.append((time() - tm_start) / 60)
@@ -125,3 +132,8 @@ print('End Time = ', datetime.now(), '(local time)')
 print()
 print('DONE!!!')
 print()
+
+with open(results_dir, 'wb') as f:  # Python 3: open(..., 'wb')
+    pickle.dump(results, f)
+    
+f.close()

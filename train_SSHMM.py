@@ -48,14 +48,19 @@ max_states = int(max_states)
 folds = int(folds)
 ids = ids.split(',')
 datasets_dir = './datasets/%s.csv'
-logs_dir = './logs/%s.log'
+# logs_dir = './logs/%s.log'
+logs_dir = f'./logs/{dataset}_{ids}_train_report.csv'
 models_dir = './models/%s.json'
 
 print()
 sshmms = []
 train_times = []
+
+# print(9)
+# print(dataset_loader(datasets_dir % dataset, ids, precision, denoised))
+
 folds = Folding(dataset_loader(datasets_dir % dataset, ids, precision, denoised), folds)
-for (fold, priors, testing) in folds: 
+for (fold, priors, testing) in folds:
     del testing
     tm_start = time()
     
@@ -126,10 +131,19 @@ report.append(['B bytes', round(sum([sshmm.B.bytes() for sshmm in sshmms]) / len
 print()
 print('-------------------------------- CSV REPORTING --------------------------------')
 print()
-print(','.join([c[0] for c in report]))
-print(','.join([str(c[1]) for c in report]))
+line1 = ','.join([c[0] for c in report])
+line2 = ','.join([str(c[1]) for c in report])
+print(line1)
+print(line2)
 print()
 print('-------------------------------- ------------- --------------------------------')
+
+text = [line1, line2]
+with open(logs_dir,"w", newline='') as file:
+    for line in text:
+        file.write(line)
+        file.write('\n')
+file.close()
 
 print()
 print('End Time = ', datetime.now(), '(local time)')
