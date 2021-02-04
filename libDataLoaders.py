@@ -163,9 +163,13 @@ def REDD_lo(filename, ids, precision, denoised=False, verbose=True):
         if verbose: print('\tDenoising aggregate meter column %s.' % agg_meter_col)
         df[agg_meter_col] = df[cols].sum(axis=1)
 
-    if verbose: print('\tCalculating unmetered column %s.' % unmetered_col)
-    df[unmetered_col] = df[agg_meter_col] - df[cols].sum(axis=1)
-    df.loc[df[unmetered_col] < 0] = 0
+    df = df.applymap(lambda x: int(x * precision))
+
+    # if verbose: print('\tCalculating unmetered column %s.' % unmetered_col)
+    # df[unmetered_col] = df[agg_meter_col] - df[cols].sum(axis=1)
+    # df.loc[df[unmetered_col] < 0] = 0
+
+    print(df)
 
     return df
 

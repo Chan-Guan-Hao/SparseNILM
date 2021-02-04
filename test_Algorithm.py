@@ -12,6 +12,7 @@ from libDataLoaders import dataset_loader
 from libFolding import Folding
 from libSSHMM import SuperStateHMM
 from libAccuracy import Accuracy
+import pandas as pd
 
 
 print()
@@ -84,12 +85,14 @@ adapted_event = 0
 adapted_errors = 0
 multi_switches_count = 0
 
+y_est_lst = []
+
 print()
-folds = Folding(dataset_loader(datasets_dir % dataset, labels, precision, denoised), folds)
+folds = Folding(dataset_loader(datasets_dir % dataset, labels, precision, denoised, verbose = False), folds)
 for (fold, priors, testing) in folds: 
     del priors
     tm_start = time()
-    
+
     sshmm = sshmms[fold]
     obs_id = list(testing)[0]
     obs = list(testing[obs_id])
@@ -100,19 +103,28 @@ for (fold, priors, testing) in folds:
     print()
     pbar = ''
     pbar_incro = len(testing) // 20
+
     for i in range(1, len(obs)):
-        multi_switches_count += (sum([i != j for (i, j) in list(zip(hidden[i - 1], hidden[i]))]) > 1)
-        
         y0 = obs[i - 1]
         y1 = obs[i]
-        
+
+        # y0 = int(y0 * precision)
+        # y1 = int(y1 * precision)
+
         start = time() 
         (p, k, Pt, cdone, ctotal) = disagg_algo(sshmm, [y0, y1])
         elapsed = (time() - start)
 
         s_est = sshmm.detangle_k(k)
         y_est = sshmm.y_estimate(s_est, breakdown=True)
-        
+        y_est = list(map(lambda x: x / precision, y_est))
+
+        if y_est == [0] * len(y_est):
+            if len(y_est_lst) > 0:
+                y_est = y_est_lst[-1]
+
+        y_est_lst.append(y_est)
+
         y_true = hidden[i]
         s_true = sshmm.obs_to_bins(y_true)
 
@@ -142,7 +154,10 @@ for (fold, priors, testing) in folds:
         if limit != 'all' and i >= limit:
             print('\n\n *** LIMIT SET: Only testing %d obs. Testing ends now!' % limit)
             break;
-                
+
+    results_df = pd.DataFrame(y_est_lst)
+    results_df.to_csv('datasets\disaggregated.csv')
+
     test_times.append((time() - tm_start) / 60)
 
     if limit != 'all' and i >= limit:
